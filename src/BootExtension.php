@@ -25,12 +25,14 @@ trait BootExtension
     {
         parent::routes(function ($router) {
             /* @var \Illuminate\Routing\Router $router */
-            $router->get('media', 'Encore\Admin\Media\MediaController@index')->name('media-index');
-            $router->get('media/download', 'Encore\Admin\Media\MediaController@download')->name('media-download');
-            $router->delete('media/delete', 'Encore\Admin\Media\MediaController@delete')->name('media-delete');
-            $router->put('media/move', 'Encore\Admin\Media\MediaController@move')->name('media-move');
-            $router->post('media/upload', 'Encore\Admin\Media\MediaController@upload')->name('media-upload');
-            $router->post('media/folder', 'Encore\Admin\Media\MediaController@newFolder')->name('media-new-folder');
+            $router->get('media', [\Encore\Admin\Media\MediaController::class, 'index'])->name('media-index');
+            $router->get('media/download', [\Encore\Admin\Media\MediaController::class, 'download'])->name('media-download');
+            $router->delete('media/delete', [\Encore\Admin\Media\MediaController::class, 'delete'])->name('media-delete');
+            $router->put('media/move', [\Encore\Admin\Media\MediaController::class, 'move'])->name('media-move');
+            $router->post('media/upload', [\Encore\Admin\Media\MediaController::class, 'upload'])->name('media-upload');
+            $router->post('media/folder', [\Encore\Admin\Media\MediaController::class, 'newFolder'])->name('media-new-folder');
+            $router->get('files', [\Encore\Admin\Media\MediaController::class, 'viewFiles'])->name("media-editor-list");
+            $router->post('files', [\Encore\Admin\Media\MediaController::class, 'uploadFiles'])->name("media-editor-upload");
         });
     }
 

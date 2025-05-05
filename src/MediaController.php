@@ -6,6 +6,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 
 class MediaController extends Controller
 {
@@ -124,5 +125,49 @@ class MediaController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    public function uploadFiles(Request $request){
+        $file = $request->file("file");
+        $path = Str::of($request->get("path", "storage"))->replace("storage/", "")->toString();
+        if($path == "storage"){
+            $path = '/';
+        }
+        $file->storePubliclyAs($path, $file->getClientOriginalName());
+
+        return $this->viewFiles($request);
+    }
+
+    public function viewFiles(Request $request){
+        $path = $request->get("path", "storage");
+
+        $returnpath = Str::of($path)->rtrim('/')->ltrim('/')->beforeLast("/")->toString();
+
+        $root_path = public_path();
+        $list_path = public_path($path);
+
+        $rii = new \RecursiveDirectoryIterator($list_path);
+        $rii->setFlags(\RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = array();
+        $folders = array();
+
+        /** @var \SplFileInfo $file */
+        foreach ($rii as $file) {
+            $file_path = str_replace($root_path, "", $file->getPathname());
+            if ($file->isDir()){
+                $folders[] = $file_path;
+                continue;
+            }
+            if(Str::of($file_path)->contains([".DS_Store", ".gitignore"])){
+                continue;
+            }
+            $files[] = $file_path;
+        }
+
+        usort($folders, 'strnatcasecmp');
+        usort($files, 'strnatcasecmp');
+
+        // Direct rendering view, Since v1.6.12
+        return view('admin.files', ['files' => $files, 'folders' => $folders, 'path' => $path, 'returnpath' => $returnpath]);
     }
 }
